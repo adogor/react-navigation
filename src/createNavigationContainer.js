@@ -47,6 +47,7 @@ export default function createNavigationContainer<T: *>(
   class NavigationContainer extends React.Component<void, Props<T>, State> {
     state: State;
     props: Props<T>;
+    navCache = null;
 
     subs: ?{
       remove: () => void,
@@ -179,8 +180,10 @@ export default function createNavigationContainer<T: *>(
       if (!this._isStateful()) {
         return false;
       }
-      const nav = Component.router.getStateForAction(action, state.nav);
-      if (nav && nav !== state.nav) {
+      if (!this.navCache) this.navCache = state.nav;
+      const nav = Component.router.getStateForAction(action, this.navCache);
+      if (nav && nav !== this.navCache) {
+        this.navCache = nav;
         this.setState({ nav }, () =>
           this._onNavigationStateChange(state.nav, nav, action));
         return true;
